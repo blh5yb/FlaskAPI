@@ -28,4 +28,10 @@ class TestNewVariant:
     def test_get_variant(self, client):
         """test getting variant by id"""
         response = client.get("/flask-demo/api/variant?id=1")
-        assert response.status_code == 200
+        assert response.status_code == 201
+
+    def test_missing_param(self, client):
+        """test missing id returns error"""
+        response = client.get("/flask-demo/api/variant")
+        assert response.status_code == 500
+
