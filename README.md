@@ -15,7 +15,7 @@ This is a demo FlaskAPI for a bioinformatics variant database
 ## Cmds
 ```
     pip install -r src/requirements
-    python3 src/app.py" runserver
+    python3 src/app.py runserver
     docker-compose build app
 ```
 
