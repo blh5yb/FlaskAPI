@@ -1,9 +1,6 @@
 import pytest
-from app import create_app
-from db.db import mongo
-from mongomock import MongoClient
+from src.app import create_app
 from unittest.mock import patch
-import unittest
 
 
 @pytest.fixture()

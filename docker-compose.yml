@@ -1,0 +1,51 @@
+
+
+services:
+  app:
+    image: $IMAGE_NAME
+    platform: linux/amd64
+    build:
+      context: .
+    restart: on-failure
+    env_file: ./.env
+    ports:
+      - 5002:5002
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - MONGODB_HOST=$MONGO_HOST
+      - PORT=$PORT
+      - EMAIL_HOST=$EMAIL_HOST
+      - EMAIL_PORT=$EMAIL_PORT
+      - EMAIL_PASS=$EMAIL_PASS
+      - EMAIL_SECURE=$EMAIL_SECURE
+      - EMAIL_TO=$EMAIL_TO
+      - EMAIL_USER=$EMAIL_USER
+      - EMAIL_SERVICE=$EMAIL_SERVICE
+      - MONGO_URI=$MONGO_URI
+      - DB_HOST=mongodb
+      - DB_USER=$MONGODB_USER
+      - DB_PASSWORD=$MONGODB_PASSWORD
+      - DB_NAME=$MONGODB_DATABASE
+      - DB_PORT=$MONGODB_PORT
+      - JWT_SECRET=$JWT_SECRET
+    stdin_open: true
+    tty: true
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:5
+    container_name: mongodb
+    restart: always
+    env_file: ./.env
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=$MONGODB_USER
+      - MONGO_INITDB_ROOT_PASSWORD=$MONGODB_PASSWORD
+    ports:
+      - 28019:$MONGODB_PORT
+    volumes:
+      - mongo:/data/db
+
+volumes:
+  mongo:
