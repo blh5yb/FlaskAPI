@@ -24,7 +24,7 @@ This is a demo FlaskAPI for a bioinformatics variant database
 ## VARIANT ENDPOINTS
 ### GET /variants
 ### GET /variants/{id}
-### ### PUT /variants/{id}
+### PUT /variants/{id}
  - req body: {"chr": "chr1", "pos": 12345, "ref": "a", "alt": "g", "variant_type": "SUBSTITUTION", "quality": 80.0}
 ### Patch /products/{id}
  - req body: {"chr": "chr1", "pos": 12345, "ref": "a", "alt": "g", "variant_type": "SUBSTITUTION", "quality": 80.0}
