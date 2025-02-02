@@ -1,11 +1,17 @@
 
 from flask import make_response, jsonify
-from err_msg import *
+from src.err_msg import error_msg
 
 
 def format_error_message(error_message: error_msg, err_thrown, cltn):
     my_msg = error_message.msg.replace('%s', cltn)
     my_error = error_message._replace(msg=my_msg)
+    res = jsonify({
+        "msg": my_error.msg,
+        "err": str(err_thrown),
+        "err_code": my_error.err_code
+    })
+    print('res', res)
     return make_response(jsonify({
         "msg": my_error.msg,
         "err": str(err_thrown),

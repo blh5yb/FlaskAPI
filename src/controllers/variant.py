@@ -2,8 +2,13 @@ from flask_restful import Resource
 from flask import request, make_response, jsonify
 from pymongo.collection import Collection
 from pydantic import ValidationError
-from services.variant_service import *
-from db import db
+
+from src.app import limiter
+from src.middleware.auth_middleware import require_authentication
+from src.services.variant_service import *
+from src.db import db
+from src.helpers.format_error_msg import format_error_message
+from src.err_msg import *
 
 
 class VariantsApi(Resource):
@@ -11,17 +16,18 @@ class VariantsApi(Resource):
         """Init db cursor"""
         self.variant_cltn: Collection = db.mongo.db['variants']
 
-    # get all 
+    # get all
     def get(self):
         """Get all variants"""
         try:
             return get_variants(self.variant_cltn, 'variants')
         except ValidationError as err:
             print('error', err)
-            response = format_error_message(INVALID_VARIANT_ERROR, err, 'variants')
+            response = format_error_message(INVALID_DATA_ERROR, err, 'variants')
             return make_response(response.get_json(), response.status_code)
 
     # create new variant
+    @require_authentication
     def post(self):
         """Save a new variant to db"""
         try:
@@ -30,7 +36,7 @@ class VariantsApi(Resource):
             return save_variant(self.variant_cltn, 'variants', body)
             #return make_response(variant, 200)
         except ValidationError as err:
-            response = format_error_message(INVALID_VARIANT_ERROR, err, 'variants')
+            response = format_error_message(INVALID_DATA_ERROR, err, 'variants')
             return make_response(response.get_json(), response.status_code)
 
 
@@ -38,6 +44,7 @@ class VariantApi(Resource):
     def __init__(self):
         self.variant_cltn: Collection = db.mongo.db['variants']
 
+    @require_authentication
     def get(self, id):
         """Get variant from database by id"""
         if not id:
@@ -45,6 +52,7 @@ class VariantApi(Resource):
             return make_response(response.get_json(), response.status_code)
         return find_variant(self.variant_cltn, 'variants', id)
 
+    @require_authentication
     def put(self, id):
         """Update a variant"""
         body = request.get_json()
@@ -54,6 +62,7 @@ class VariantApi(Resource):
 
         return update_variant(self.variant_cltn, 'variants', id, body)
 
+    @require_authentication
     def delete(self, id):
         """Update a variant"""
         if not id:
