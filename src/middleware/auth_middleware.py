@@ -1,8 +1,11 @@
 import jwt
-from src.helpers.helper_functions import logger
-from flask import request
+from flask import request, abort
 import os
 from datetime import datetime, timedelta, timezone
+
+from helpers.helper_functions import logger
+
+from handle_errors import AuthError
 
 jwt_secret = os.getenv('JWT_SECRET')
 
@@ -20,18 +23,22 @@ class AuthMiddleware:
     access_token  = request.headers.get('Authorization', '')
     refresh_token = request.cookies.get('refreshToken', '')
 
-    if not access_token and not refresh_token:
-      raise SystemError('No auth token provided')
-
     print('auth token', access_token, access_token)
+    if not access_token and not refresh_token:
+      raise AuthError('No auth token provided')
+      #print('no auth token')
+      #abort(401, 'No auth token provided')
+
     valid_auth = self.is_valid_token(access_token)
     if not valid_auth:
       if not refresh_token:
-        raise SystemError('No auth token provided')
+        raise AuthError('No auth token provided')
+        # raise SystemError('No auth token provided')
 
       valid_auth = self.is_valid_token(refresh_token)
       if not valid_auth:
-        raise SystemError('No auth token provided')
+        #raise SystemError('No auth token provided')
+        raise AuthError('No auth token provided')
 
       refreshed_user = jwt.encode(
         {'user_id': valid_auth['_id'], 'exp': datetime.now(timezone.utc) + timedelta(hours=24)},

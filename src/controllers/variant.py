@@ -3,12 +3,11 @@ from flask import request, make_response, jsonify
 from pymongo.collection import Collection
 from pydantic import ValidationError
 
-from src.app import limiter
-from src.middleware.auth_middleware import require_authentication
-from src.services.variant_service import *
-from src.db import db
-from src.helpers.format_error_msg import format_error_message
-from src.err_msg import *
+from middleware.auth_middleware import require_authentication
+from services.variant_service import *
+from db import db
+from helpers.format_error_msg import format_error_message
+from err_msg import *
 
 
 class VariantsApi(Resource):

@@ -2,23 +2,16 @@ from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
 import os, sys
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 
 # export path
-dir_path = os.path.dirname(os.path.realpath(__file__))
-print('dirpath', dir_path)
-sys.path.append(dir_path)
-from src.controllers.variant import *
-from src.db.db import mongo
-from src.controllers.auth import RegisterApi, AuthApi, RefreshApi
+# from pathlib import Path
 
+dir_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src'))
+sys.path.append(dir_path)
+from controllers.variant import *
+from db.db import mongo
 app = Flask(__name__)
-limiter = Limiter(
-    app=app,
-    key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"] # applies to all routes by default
-)
+# bcrypt = Bcrypt(app)
 
 def create_app(config_filename):
     allowed_origins = os.getenv('allowedOrigins').split(' ')
@@ -28,9 +21,16 @@ def create_app(config_filename):
     mongo.init_app(app)
     api = Api(app)
 
+    # handle errors
+    from handle_errors import handle_auth_error, AuthError, handle_environment, handle_value_error
+    app.register_error_handler(AuthError, handle_auth_error)
+    app.register_error_handler(EnvironmentError, handle_environment)
+    app.register_error_handler(ValueError, handle_value_error)
+
+    from controllers.auth import RegisterApi, AuthApi, RefreshApi
     api.add_resource(RegisterApi, '/flask-demo/api/register')
     api.add_resource(RefreshApi, '/flask-demo/api/refresh')
-    api.add_resource(AuthApi, '/flask-demo/api/user_auth/<id>')
+    api.add_resource(AuthApi, '/flask-demo/api/user_auth', '/flask-demo/api/user_auth/<id>')
     api.add_resource(VariantsApi, '/flask-demo/api/variants')
     api.add_resource(VariantApi, '/flask-demo/api/variants/<id>')
     return app
@@ -39,4 +39,4 @@ def create_app(config_filename):
 
 if __name__ == '__main__':
     my_app = create_app('config.BaseConfig')
-    my_app.run(host='0.0.0.0', port=5002, debug=os.getenv('isDev'), use_reloader=True)
+    my_app.run(host='0.0.0.0', port=5003, debug=os.getenv('isDev'), use_reloader=True)

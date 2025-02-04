@@ -1,8 +1,8 @@
 from datetime import datetime
-from src.models.variant_model import VariantModel
-from src.helpers.format_error_msg import format_error_message
-from src.err_msg import *
-from src.helpers.parse_db_res import parse_db_res
+from models.variant_model import VariantModel
+from helpers.format_error_msg import format_error_message
+from err_msg import *
+from helpers.parse_db_res import parse_db_res
 from bson.objectid import ObjectId
 
 def get_variants(cursor, cltn):

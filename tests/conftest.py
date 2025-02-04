@@ -1,10 +1,15 @@
 import pytest
+import sys, os
+print('conftest', sys.path)
+#current_dir = os.getcwd()
+#parent_dir = os.path.dirname(current_dir)
+#sys.path.insert(0,parent_dir)
+
 from src.app import create_app
 from unittest.mock import patch
 from dotenv import load_dotenv
 
 from bson.objectid import ObjectId
-
 @pytest.fixture(scope="session")
 def app():
     load_dotenv()
@@ -17,7 +22,7 @@ def app():
     yield test_app
 
 
-@pytest.fixture()
+@pytest.fixture(scope="session")
 def client(app):
     return app.test_client()
 
@@ -27,7 +32,7 @@ def runner(app):
     return app.test_cli_runner()
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="module")
 def mongo_mock(app):
     """create mongo db collection find mock"""
     with patch('db.db.mongo.db') as mock_mongo:
@@ -72,3 +77,14 @@ def bcrypt_mock(app):
     with patch('bcrypt') as mock_bcrypt:
         mock_bcrypt.hashpw.return_value = hashedPass
         yield mock_bcrypt
+
+#@pytest.fixture(scope="function")
+#def mock_create_user():
+#    with patch('src.controllers.services.auth.create_user') as create_user_mock:
+#        yield create_user_mock
+
+
+class DbInsertRes:
+    def __init__(self, inserted_id, deleted_count = 1):
+        self.inserted_id = inserted_id
+        self.deleted_count = deleted_count
