@@ -9,6 +9,6 @@ sample_var = {
 
 sample_login = {
     "name": "Barry H",
-    "email": "test@email.com",
-    "password": "superSecretPassword1"
+    "email": "test1@email.com",
+    "password": "secretpassword1"
 }

@@ -22,10 +22,11 @@ def create_app(config_filename):
     api = Api(app)
 
     # handle errors
-    from handle_errors import handle_auth_error, AuthError, handle_environment, handle_value_error
+    from handle_errors import handle_auth_error, AuthError, handle_environment, handle_value_error, NotFoundError, handle_db_search_error
     app.register_error_handler(AuthError, handle_auth_error)
     app.register_error_handler(EnvironmentError, handle_environment)
     app.register_error_handler(ValueError, handle_value_error)
+    app.register_error_handler(NotFoundError, handle_db_search_error)
 
     from controllers.auth import RegisterApi, AuthApi, RefreshApi
     api.add_resource(RegisterApi, '/flask-demo/api/register')

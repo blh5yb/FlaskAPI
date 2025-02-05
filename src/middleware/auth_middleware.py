@@ -1,5 +1,5 @@
 import jwt
-from flask import request, abort
+from flask import request, abort, make_response
 import os
 from datetime import datetime, timedelta, timezone
 
@@ -56,6 +56,7 @@ def require_authentication(func):
       response.headers['Authorization'] = refreshed_user['idToken']
       response.set_cookie('refreshToken', refreshed_user['refreshToken'], max_age=60 * 60 * 24, httponly=True,
                           samesite='strict')
-      return response
+
+    return make_response(response.get_json(), response.status_code)
 
   return wrapper

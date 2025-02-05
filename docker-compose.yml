@@ -7,7 +7,7 @@ services:
     build:
       context: .
     volumes:
-      - ./:/src
+      - ./src:/src
     restart: on-failure
     env_file: ./.env
     ports:

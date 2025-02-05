@@ -1,6 +1,6 @@
 
 from flask import make_response, jsonify
-from err_msg import error_msg
+from err_msg import *
 
 
 def format_error_message(error_message: error_msg, err_thrown, cltn):

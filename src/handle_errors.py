@@ -1,23 +1,35 @@
 # export path
-import sys, os
+import os
 
 from flask import make_response
 
 from app import app
 from helpers.format_error_msg import format_error_message
-from err_msg import UNAUTHORIZED, SERVER_ERROR, UNKNOWN
+from err_msg import UNAUTHORIZED, SERVER_ERROR, UNKNOWN, DB_SEARCH_ERROR
 from helpers.helper_functions import logger
 
 
 class AuthError(Exception):
-    def __init__(self, message, status_code=401):
+    def __init__(self, message):
         self.message = message
-        self.status_code = status_code
+
+
+class NotFoundError(Exception):
+    def __init__(self, message, cltn='users'):
+        self.message = message
+        self.cltn = cltn
 
 @app.errorhandler(AuthError) # caught the auth middle ware error
 def handle_auth_error(e):
-      logger.error(f'User unauthorized: {e}')
-      response = format_error_message(UNAUTHORIZED, e, 'auth')
+      logger.error(f'User unauthorized: {e.message}')
+      response = format_error_message(UNAUTHORIZED, e.message, 'auth')
+      return make_response(response.get_json(), response.status)
+
+
+@app.errorhandler(NotFoundError) # caught the auth middle ware error
+def handle_db_search_error(e):
+      logger.error(f'Data Not Found: {e.message}')
+      response = format_error_message(DB_SEARCH_ERROR, e.message, e.cltn)
       return make_response(response.get_json(), response.status)
 
 

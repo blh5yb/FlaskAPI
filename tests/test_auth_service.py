@@ -1,4 +1,3 @@
-import os
 
 from src.services.auth_service import *
 from src.err_msg import *
@@ -80,8 +79,8 @@ class TestSignIn:
         #assert actual == expected
         #mock_user_model.check_password.assert_not_called()
 
-    def test_password_mismatch(self, mongo_mock, mock_user_model, mock_format_error, mock_sign_jwt):
-        mongo_mock.find_one.return_value = new_user
+    def test_password_mismatch(self, mongo_mock, mock_user_model, mock_sign_jwt):
+        mongo_mock.find_one.return_value = my_login
         mock_user_model.return_value.check_password.return_value = False
         with pytest.raises(ValueError) as e:
             sign_in(mongo_mock, new_user)
@@ -93,7 +92,7 @@ class TestRefresh:
     @patch('jwt.decode')
     @patch('jwt.encode')
     def test_refresh_success(self, mock_encode, mock_decode):
-        mock_decode.return_value = parsed_user
+        mock_decode.return_value = {'user_id': 'user_id'}
         mock_encode.return_value = accessToken
         actual = refresh_user(refreshToken)
         assert actual == accessToken

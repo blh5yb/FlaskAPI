@@ -19,9 +19,12 @@ class VariantsApi(Resource):
     def get(self):
         """Get all variants"""
         try:
-            return get_variants(self.variant_cltn, 'variants')
+            variants = get_variants(self.variant_cltn, 'variants')
+            return make_response(jsonify({
+                "msg": f'Fetched {len(variants)} variants from db',
+                "data": [parse_db_res(variant) for variant in variants]
+            }), 200)
         except ValidationError as err:
-            print('error', err)
             response = format_error_message(INVALID_DATA_ERROR, err, 'variants')
             return make_response(response.get_json(), response.status_code)
 
@@ -31,8 +34,11 @@ class VariantsApi(Resource):
         """Save a new variant to db"""
         try:
             body = request.get_json()
-            print(body)
-            return save_variant(self.variant_cltn, 'variants', body)
+            result_id = save_variant(self.variant_cltn, body)
+            return make_response(jsonify({
+                "msg": f"Inserted variant",
+                "data": {"id": f"{result_id}"}
+            }), 201)
             #return make_response(variant, 200)
         except ValidationError as err:
             response = format_error_message(INVALID_DATA_ERROR, err, 'variants')
@@ -46,20 +52,38 @@ class VariantApi(Resource):
     @require_authentication
     def get(self, id):
         """Get variant from database by id"""
-        if not id:
-            response = format_error_message(MISSING_QUERY_PARAMETER, 'MISSING_QUERY_PARAMETER', 'id')
+        try:
+            if not id:
+                response = format_error_message(MISSING_QUERY_PARAMETER, 'MISSING_QUERY_PARAMETER', 'id')
+                return make_response(response.get_json(), response.status_code)
+
+            result = find_variant(self.variant_cltn, id)
+            response = make_response(jsonify({
+                "msg": f"Fetched Variant",
+                "data": result,
+            }), 200)
+            return response
+        except Exception as err:
+            response = format_error_message(DB_SEARCH_ERROR, err, 'variants')
             return make_response(response.get_json(), response.status_code)
-        return find_variant(self.variant_cltn, 'variants', id)
 
     @require_authentication
     def put(self, id):
         """Update a variant"""
-        body = request.get_json()
-        if not id or not body:
-            response = format_error_message(BAD_REQUEST,'BAD_REQUEST', 'id')
-            return make_response(response.get_json(), response.status_code)
+        try:
+            body = request.get_json()
+            if not id or not body:
+                response = format_error_message(BAD_REQUEST,'BAD_REQUEST', 'id')
+                return make_response(response.get_json(), response.status_code)
 
-        return update_variant(self.variant_cltn, 'variants', id, body)
+            variant_id = update_variant(self.variant_cltn, id, body)
+            return make_response(jsonify({
+                    "msg": f"Updated Variant",
+                    "data": {"_id": variant_id},
+            }), 200)
+        except (ValidationError, ValueError) as err:
+            response = format_error_message(INVALID_DATA_ERROR, err, 'variants')
+            return make_response(response.get_json(), response.status_code)
 
     @require_authentication
     def delete(self, id):
@@ -68,5 +92,12 @@ class VariantApi(Resource):
             response = format_error_message(MISSING_QUERY_PARAMETER, 'MISSING_QUERY_PARAMETER', 'id')
             return make_response(response.get_json(), response.status_code)
 
-        return delete_variant(self.variant_cltn, 'variants', id)
+        try:
+            result = delete_variant(self.variant_cltn, id)
+            return make_response(jsonify({
+                "msg": f"Deleted {result.deleted_count} Variants",
+                "data": {},
+            }), 200)
+        except Exception as err:
+            return format_error_message(DB_UPDATE_ERROR, err, 'variants')
 

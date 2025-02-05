@@ -25,7 +25,7 @@ COPY ./src /src
 RUN chmod 755 /src
 COPY ./requirements.txt .
 RUN pip install -r /requirements.txt
-WORKDIR
+
 ENTRYPOINT [ "python3", "/src/app.py", "runserver" ]
 ##################################################
 

@@ -3,13 +3,12 @@ import os
 from datetime import datetime, timedelta, timezone
 
 from bson import ObjectId
-from flask import make_response
+# from flask import make_response
+# from err_msg import INVALID_DATA_ERROR, INVALID_TOKEN, DB_SEARCH_ERROR, INVALID_LOGIN, UNKNOWN, DB_UPDATE_ERROR
+# from helpers.format_error_msg import format_error_message
 
-from err_msg import INVALID_DATA_ERROR, INVALID_TOKEN, DB_SEARCH_ERROR, INVALID_LOGIN, UNKNOWN, DB_UPDATE_ERROR
-from helpers.format_error_msg import format_error_message
 from models.user_model import UserModel
-
-from tests.conftest import refreshToken
+from helpers.parse_db_res import parse_db_res
 
 jwt_secret = os.getenv('JWT_SECRET')
 
@@ -35,10 +34,10 @@ def sign_jwt(user):
 
 
 def create_user(cursor, data):
+    cursor.delete_many({'email': data['email']})
     if cursor.count_documents({'email': data['email']}):
         raise ValueError("Email Found")
 
-    print('continue')
     user = UserModel(**data)
     result_id = str(cursor.insert_one(user.dict()).inserted_id)
     data['_id'] = result_id
@@ -46,22 +45,23 @@ def create_user(cursor, data):
     return signed_user
 
 def sign_in(cursor, credentials):
-        result = cursor.find_one({"email": credentials["email"]})
-        if not result:
-            raise ValueError("User Not Found")
+    result = cursor.find_one({"email": credentials["email"]})
+    if not result:
+        raise ValueError("User Not Found")
 
-        user = UserModel(**result)
-        password_match = user.check_password(credentials["password"])
-        if not password_match:
-            raise ValueError("Invalid Login Credentials")
+    parsed_result = parse_db_res(result)
+    user = UserModel(**parsed_result)
+    password_match = user.check_password(credentials["password"])
+    if not password_match:
+        raise ValueError("Invalid Login Credentials")
 
-        return sign_jwt(user.dict())
+    return sign_jwt(parsed_result)
 
 
 def refresh_user(refresh_token):
     decoded = jwt.decode(refresh_token, jwt_secret, algorithms=["HS256"])
     return jwt.encode(
-        {'user_id': decoded['_id'], 'exp': datetime.now(timezone.utc) + timedelta(minutes=60)},
+        {'user_id': decoded['user_id'], 'exp': datetime.now(timezone.utc) + timedelta(minutes=60)},
         jwt_secret, algorithm="HS256"
     )
 

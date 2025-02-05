@@ -1,5 +1,3 @@
-from multiprocessing.managers import Value
-from os import access
 
 from tests.conftest import *
 import json
@@ -18,7 +16,7 @@ def mock_mongo_constructor(mongo_mock):
 
 class TestUserCreationController:
     #@patch('services.auth_service.create_user')
-    #@patch(f'{controllers}/auth.create_user')
+    # @patch(f'{controllers}/auth.create_user')
     def test_create_user_success(self, mock_create_user, mock_mongo_constructor, client):
         my_user = {
             "user": "Barry",

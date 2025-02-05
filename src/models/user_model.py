@@ -15,9 +15,11 @@ class UserModel(BaseModel):
 
     @validator('password')
     def hash_password(cls, v):
-        hashed_pass = bcrypt.hashpw(v.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-        print(hashed_pass)
-        return hashed_pass
+        print('path', request.path)
+        if request.path == '/flask-demo/api/register': # or update user?
+            hashed_pass = bcrypt.hashpw(v.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            return hashed_pass
+        return v
 
-    def check_password(self, password):# $2b$12$RHfgCwaVAhyWrGXJD3QylOhYCZvQaATZhRvPrN3ZJQumI2QYfzuNW
+    def check_password(self, password):
         return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
