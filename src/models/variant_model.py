@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, validator, root_validator
+from pydantic import BaseModel, validator
 from typing import Optional
 from datetime import datetime
 
@@ -25,7 +25,8 @@ class VariantModel(BaseModel):
     alt: str
     variant_type: str
     quality: Optional[float]
-    date: Optional[datetime] = Field(default_factory=datetime.utcnow)
+    created_at: Optional[datetime] = datetime.utcnow() #
+    updated_at: Optional[datetime] = datetime.utcnow()
     #gene: GeneModel
 
     # custom validators
@@ -42,9 +43,6 @@ class VariantModel(BaseModel):
         allowed_chr = {f'chr{i}': True for i in range(1, 23)}
         allowed_chr['chrX'] = True
         allowed_chr['chrY'] = True
-       # allowed_ids.extend(['X', 'Y'])
-        #allowed_chr = ['chr' + i for i in allowed_ids]
-        print('chr', v, allowed_chr[v])
         if not allowed_chr[v]:
             raise ValueError('chr value is not allowed')
         return v

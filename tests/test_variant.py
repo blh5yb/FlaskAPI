@@ -1,7 +1,4 @@
-from pathlib import Path
 from tests.conftest import *
-
-resources = Path(__file__).parent / "resources"
 
 
 class TestNewVariant:

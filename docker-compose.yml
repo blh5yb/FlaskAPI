@@ -6,10 +6,12 @@ services:
     platform: linux/amd64
     build:
       context: .
+    volumes:
+      - ./src:/src
     restart: on-failure
     env_file: ./.env
     ports:
-      - 5002:5002
+      - 5003:5003
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
@@ -36,7 +38,7 @@ services:
 
   mongo:
     image: mongo:5
-    container_name: mongodb
+    container_name: mongodbdev
     restart: always
     env_file: ./.env
     environment:
